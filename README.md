@@ -1,2 +1,2 @@
 # Reweave-Dashboard
-Its a Reweave Digital MRV for for all Biomass, Community and Finance Update
+Its a Reweave Digital MRV for all Geospatial layer, Community and Finance Update
