@@ -10,6 +10,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# =========================================================================== #
+#  EASY SETTINGS  –  the things you are most likely to want to tweak.
+#  Edit a value, commit on GitHub, and Streamlit Cloud redeploys by itself.
+# =========================================================================== #
+HEADER_ORG_PX = 28            # header: size of "REWEAVE COLLECTIVES"  (big)
+HEADER_LANDSCAPE_PX = 13      # header: size of "Barnadi Grassland"    (small)
+CARBON_UNIT = "tonnes C"      # unit shown for carbon / biomass (avoids a capital "T")
+AGB_VMIN, AGB_VMAX = 0.0, 160.0   # AGB colour scale + legend range (Mg/ha); data spans ~19-158
+
 # --------------------------------------------------------------------------- #
 # Identity
 # --------------------------------------------------------------------------- #
@@ -72,21 +81,22 @@ BASEMAP_ATTR = "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics"
 AOI_LINE_COLOR = "#5cc8f2"
 
 # --------------------------------------------------------------------------- #
-# Dark-theme palette (matched to the sage / beige of the REWEAVE logo)
+# Dark theme: carbon black + dark grey, with dark-olive accents
 # --------------------------------------------------------------------------- #
 PALETTE = {
-    "bg": "#0a100d",
-    "surface": "#111a15",
-    "card": "#141e18",
-    "border": "#22322a",
-    "text": "#e6ede8",
-    "muted": "#8da396",
-    "sage": "#9cc5a1",
-    "beige": "#d9cfa3",
-    "green": "#6fd08c",
+    "bg": "#0a0b09",          # carbon black (page)
+    "surface": "#121311",
+    "card": "#171916",        # dark grey (cards)
+    "border": "#2b2e27",
+    "text": "#e9eae3",
+    "muted": "#9a9e8f",
+    "accent": "#9aab4d",      # olive (lines, highlights, active slider)
+    "olive": "#5c6a2a",       # dark olive (selected tab fill)
+    "olive_hi": "#6d7d33",
+    "beige": "#cfc28a",       # khaki (organisation name)
     "amber": "#f2b45a",
     "sky": "#5cc8f2",
-    "grid": "rgba(230,237,232,0.08)",
+    "grid": "rgba(233,234,227,0.08)",
 }
 
 # --------------------------------------------------------------------------- #
