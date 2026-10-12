@@ -115,12 +115,12 @@ def stack_figure(geo: GeoData, idx: int) -> go.Figure:
 def trend_figure(geo: GeoData, idx: int) -> go.Figure:
     names = [m.name for m in geo.months]
     fig = go.Figure(go.Scatter(x=names, y=geo.agb_total, mode="lines+markers", fill="tozeroy",
-                               fillcolor="rgba(156,197,161,0.10)", line=dict(color=P["sage"], width=2.5),
-                               marker=dict(size=7, color=P["sage"]),
-                               hovertemplate="%{x}<br>%{y:,.2f} t C<extra></extra>"))
+                               fillcolor=T.rgba(P["accent"], 0.12), line=dict(color=P["accent"], width=2.5),
+                               marker=dict(size=7, color=P["accent"]),
+                               hovertemplate="%{x}<br>%{y:,.2f} " + C.CARBON_UNIT + "<extra></extra>"))
     fig.add_trace(go.Scatter(x=[names[idx]], y=[geo.agb_total[idx]], mode="markers", hoverinfo="skip",
-                             marker=dict(size=15, color=P["green"], line=dict(width=2.5, color="#ffffff"))))
-    fig.update_layout(showlegend=False, yaxis_title="t C", yaxis_rangemode="tozero")
+                             marker=dict(size=15, color=P["accent"], line=dict(width=2.5, color="#ffffff"))))
+    fig.update_layout(showlegend=False, yaxis_title=C.CARBON_UNIT, yaxis_rangemode="tozero")
     return T.style_fig(fig, C.CHART_H_BOTTOM, margin=dict(l=8, r=14, t=8, b=8))
 
 
@@ -149,9 +149,9 @@ def render(geo: GeoData) -> None:
         with c1, st.container(key="ctl_raster"):
             layer = st.selectbox("Raster layer (added to basemap)", list(C.LAYERS), format_func=C.LAYERS.get,
                                  key="raster_layer")
-        c2.html(T.kpi_html("Harvested biomass (t C)", f"{geo.harvest_biomass[idx]:,.2f}", P["amber"],
-                           "initial" if idx == 0 else sel))
-        c3.html(T.kpi_html("Total AGB biomass (t C)", f"{geo.agb_total[idx]:,.2f}", P["green"], sel))
+        c2.html(T.kpi_html("Harvested biomass", f"{geo.harvest_biomass[idx]:,.2f}", P["amber"],
+                           "initial" if idx == 0 else sel, unit=C.CARBON_UNIT))
+        c3.html(T.kpi_html("Total AGB biomass", f"{geo.agb_total[idx]:,.2f}", P["accent"], sel, unit=C.CARBON_UNIT))
     with right, st.container(key="ctl_sankey"):
         mode = st.selectbox(
             "Sankey transition" if idx else "Sankey transition (from the second month)", list(SANKEY_MODES),
@@ -172,7 +172,7 @@ def render(geo: GeoData) -> None:
 
     with right, st.container(key="card_sankey"):
         if idx == 0:
-            st.html(T.card_header(f"Vegetation propagation area — {sel} (baseline)", pill="ha"))
+            st.html(T.card_header(f"Vegetation propagation area — {sel} (baseline)", pill="hectares"))
             st.plotly_chart(baseline_bars(geo), key="sankey", config=GRAPH_CFG, theme=None)
         else:
             fig_s, title = sankey_figure(geo, idx, mode)
@@ -185,10 +185,10 @@ def render(geo: GeoData) -> None:
         st.html(T.card_header("Vegetation propagation area (ha)"))
         st.plotly_chart(stack_figure(geo, idx), key="stack", config=GRAPH_CFG, theme=None)
     with b2:
-        st.html(T.kpi_html("Harvest area (ha)", f"{geo.harvest_area[idx]:,.2f}", P["amber"], sel).replace('class="kpi"', 'class="kpi lg"'))
-        st.html(T.kpi_html("Total plot area (ha)", f"{geo.plot_area_ha:,.2f}", P["sky"]).replace('class="kpi"', 'class="kpi lg"'))
+        st.html(T.kpi_html("Harvest area", f"{geo.harvest_area[idx]:,.2f}", P["amber"], sel, unit="ha").replace('class="kpi"', 'class="kpi lg"'))
+        st.html(T.kpi_html("Total plot area", f"{geo.plot_area_ha:,.2f}", P["sky"], unit="ha").replace('class="kpi"', 'class="kpi lg"'))
     with b3, st.container(key="card_trend"):
-        st.html(T.card_header("Total biomass trend (t C)"))
+        st.html(T.card_header(f"Total biomass trend ({C.CARBON_UNIT})"))
         st.plotly_chart(trend_figure(geo, idx), key="trend", config=GRAPH_CFG, theme=None)
     with b4, st.container(key="card_legend"):
         st.html(T.card_header("Legend"))
