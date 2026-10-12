@@ -285,11 +285,7 @@ def load_geodata(data_dir: Path | str = C.DATA_DIR) -> GeoData:
     if len(shapes) != 1:
         raise ValueError(f"Rasters are not on a common grid: {shapes}")
 
-    allv = np.concatenate([a.ravel() for a in arrays["agb"]])
-    allv = allv[~np.isnan(allv)]
-    vmin, vmax = (float(np.percentile(allv, 2)), float(np.percentile(allv, 98))) if allv.size else (0.0, 1.0)
-    if vmax <= vmin:
-        vmax = vmin + 1.0
+    vmin, vmax = float(C.AGB_VMIN), float(C.AGB_VMAX)      # fixed scale (see config.EASY SETTINGS)
 
     overlays = {}
     for layer in arrays:
