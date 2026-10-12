@@ -15,6 +15,16 @@ from PIL import Image
 from . import config as C
 
 P = C.PALETTE
+
+
+def _rgb(hex_color: str) -> str:
+    r, g, b = (int(c * 255) for c in mcolors.to_rgb(hex_color))
+    return f"{r},{g},{b}"
+
+
+def rgba(hex_color: str, alpha: float) -> str:
+    return f"rgba({_rgb(hex_color)},{alpha})"
+
 FONT_UI = "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
 FONT_DISPLAY = "'Fraunces', Georgia, 'Times New Roman', serif"
 
@@ -59,14 +69,14 @@ _CSS = Template(r"""
 
 :root{
   --bg:$bg; --surface:$surface; --card:$card; --border:$border; --text:$text; --muted:$muted;
-  --sage:$sage; --beige:$beige; --green:$green; --amber:$amber; --sky:$sky;
+  --accent:$accent; --olive:$olive; --olive-hi:$olive_hi; --beige:$beige; --amber:$amber; --sky:$sky;
 }
 
 /* ---------- base ---------- */
 .stApp{
   background:
-    radial-gradient(1100px 520px at 6% -12%, rgba(156,197,161,.11), transparent 62%),
-    radial-gradient(900px 500px at 104% -6%, rgba(217,207,163,.07), transparent 58%),
+    radial-gradient(1100px 520px at 6% -12%, rgba($accent_rgb,.11), transparent 62%),
+    radial-gradient(900px 500px at 104% -6%, rgba($beige_rgb,.07), transparent 58%),
     var(--bg);
   color:var(--text);
   font-family:$font_ui;
@@ -82,12 +92,12 @@ _CSS = Template(r"""
 
 /* ---------- header ---------- */
 .hdr{ display:flex; align-items:center; gap:14px; height:54px; }
-.hdr-logo{ height:50px; width:auto; filter:drop-shadow(0 0 10px rgba(156,197,161,.28)); }
+.hdr-logo{ height:50px; width:auto; filter:drop-shadow(0 0 10px rgba($accent_rgb,.28)); }
 .hdr-text{ display:flex; flex-direction:column; line-height:1.12; }
-.hdr-org{ font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--beige); font-weight:700; }
-.hdr-name{ font-family:$font_display; font-size:26px; font-weight:600; color:var(--text); letter-spacing:.005em; }
-.hdr-loc{ font-size:12px; color:var(--muted); font-weight:500; margin-left:10px; letter-spacing:.04em; }
-.hdr-name-row{ display:flex; align-items:baseline; }
+.hdr-org{ font-family:$font_display; font-size:${org_px}px; letter-spacing:.13em; text-transform:uppercase; color:var(--beige); font-weight:600; line-height:1.05; }
+.hdr-name-row{ display:flex; align-items:baseline; margin-top:4px; }
+.hdr-name{ font-size:${land_px}px; font-weight:700; color:var(--text); letter-spacing:.05em; }
+.hdr-loc{ font-size:${land_px}px; color:var(--muted); font-weight:500; margin-left:10px; letter-spacing:.04em; }
 .chip{ margin-left:14px; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.14em;
        color:var(--amber); border:1px solid rgba(242,180,90,.38); background:rgba(242,180,90,.08); align-self:center; }
 
@@ -106,7 +116,7 @@ _CSS = Template(r"""
 [data-testid="stTabs"] [role="tab"] p{ font-size:13.5px; font-weight:700; letter-spacing:.03em; color:inherit; margin:0; }
 [data-testid="stTabs"] [role="tab"]:hover{ color:var(--text); background:rgba(255,255,255,.05); }
 [data-testid="stTabs"] [role="tab"][aria-selected="true"]{
-  color:#0a100d; background:linear-gradient(180deg,var(--sage),#86b48d); box-shadow:0 4px 14px rgba(156,197,161,.28);
+  color:#f1f3e2; background:linear-gradient(180deg,var(--olive-hi),var(--olive)); box-shadow:0 4px 14px rgba($accent_rgb,.22), inset 0 1px 0 rgba(255,255,255,.12);
 }
 [data-testid="stTabs"] [role="tabpanel"]{ padding-top:.1rem; }
 
@@ -121,8 +131,8 @@ _CSS = Template(r"""
 .st-key-card_stack, .st-key-card_trend, .st-key-card_legend{ height:${h_bottom}px; }
 .card-h{ display:flex; align-items:center; justify-content:space-between; height:${head}px; padding:0 4px; }
 .card-h-t{ font-size:13px; font-weight:700; color:var(--text); letter-spacing:.02em; }
-.card-h-pill{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--sage);
-              border:1px solid rgba(156,197,161,.35); background:rgba(156,197,161,.08); padding:2px 9px; border-radius:999px; }
+.card-h-pill{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+              border:1px solid rgba($accent_rgb,.35); background:rgba($accent_rgb,.08); padding:2px 9px; border-radius:999px; }
 
 /* ---------- control cards (dropdowns) + KPI cards share one look ---------- */
 [class*="st-key-ctl_"], .kpi{
@@ -131,19 +141,20 @@ _CSS = Template(r"""
   box-shadow:0 8px 22px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.03);
   position:relative; overflow:hidden;
 }
-.kpi::before{ content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:0 3px 3px 0; background:var(--accent,var(--sage)); }
+.kpi::before{ content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:0 3px 3px 0; background:var(--accent,var(--accent)); }
 .kpi-l{ font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.kpi-u{ text-transform:none; letter-spacing:.02em; font-weight:600; opacity:.85; }
 .kpi-v{ margin-top:3px; font-size:27px; font-weight:700; line-height:1.1; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
 .kpi.lg{ height:${h_kpi_lg}px; padding-top:18px; margin-bottom:10px; }
 .kpi.lg .kpi-v{ font-size:34px; margin-top:6px; }
-.kpi-n{ margin-left:8px; font-size:11px; font-weight:600; color:var(--accent,var(--sage)); letter-spacing:.06em; text-transform:uppercase; }
+.kpi-n{ margin-left:8px; font-size:11px; font-weight:600; color:var(--accent,var(--accent)); letter-spacing:.06em; text-transform:uppercase; }
 [class*="st-key-ctl_"]{ gap:0 !important; flex:0 0 auto !important; padding-top:6px !important; padding-bottom:5px !important; }
 [class*="st-key-ctl_"] [data-testid="stSelectbox"]{ margin-top:-2px; }
 [class*="st-key-ctl_"] [data-testid="stWidgetLabel"]{ min-height:0; margin-bottom:2px; }
 [data-testid="stWidgetLabel"] p{ font-size:10.5px !important; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted) !important; }
 [data-testid="stSelectbox"] [role="group"]{ background:rgba(255,255,255,.045) !important; border:1px solid var(--border) !important;
   border-radius:9px !important; min-height:34px !important; height:34px !important; }
-[data-testid="stSelectbox"] [role="group"]:hover{ border-color:rgba(156,197,161,.45) !important; }
+[data-testid="stSelectbox"] [role="group"]:hover{ border-color:rgba($accent_rgb,.45) !important; }
 [data-testid="stSelectbox"] input[role="combobox"], [data-testid="stSelectbox"] [role="group"] *{ font-size:13px; font-weight:600; }
 
 /* ---------- time slider ---------- */
@@ -153,7 +164,7 @@ _CSS = Template(r"""
 .st-key-slider_wrap [data-testid="stSliderTickBar"]{ display:none; }
 .ticks{ display:flex; justify-content:space-between; margin:-6px 4px 0 4px; }
 .ticks span{ font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.03em; }
-.ticks span.on{ color:var(--sage); }
+.ticks span.on{ color:var(--accent); }
 .tl-label{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:2px 18px 0 18px; }
 
 /* ---------- legend ---------- */
@@ -173,11 +184,11 @@ _CSS = Template(r"""
 .section{ display:flex; align-items:center; justify-content:space-between; margin:2px 2px 0 2px; }
 .section-t{ font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--beige); }
 .section-s{ font-size:11px; color:var(--muted); letter-spacing:.03em; }
-.foot{ margin-top:2px; font-size:10.5px; color:#6d8276; letter-spacing:.02em; text-align:center; }
+.foot{ margin-top:2px; font-size:10.5px; color:#767a6c; letter-spacing:.02em; text-align:center; }
 .empty{ height:calc(100vh - 120px); min-height:430px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-        border:1.5px dashed rgba(141,163,150,.28); border-radius:18px; background:rgba(255,255,255,.012); }
-.empty-ring{ width:64px; height:64px; border-radius:50%; border:2px solid rgba(156,197,161,.35); display:flex; align-items:center; justify-content:center; }
-.empty-dot{ width:12px; height:12px; border-radius:50%; background:var(--sage); opacity:.7; animation:pulse 2.4s ease-in-out infinite; }
+        border:1.5px dashed rgba($muted_rgb,.28); border-radius:18px; background:rgba(255,255,255,.012); }
+.empty-ring{ width:64px; height:64px; border-radius:50%; border:2px solid rgba($accent_rgb,.35); display:flex; align-items:center; justify-content:center; }
+.empty-dot{ width:12px; height:12px; border-radius:50%; background:var(--accent); opacity:.7; animation:pulse 2.4s ease-in-out infinite; }
 @keyframes pulse{ 0%,100%{ transform:scale(.7); opacity:.35 } 50%{ transform:scale(1.15); opacity:.85 } }
 .empty-t{ font-family:$font_display; font-size:24px; color:var(--text); }
 .empty-s{ font-size:13px; color:var(--muted); letter-spacing:.04em; }
@@ -190,7 +201,9 @@ _CSS = Template(r"""
 def css() -> str:
     return "<style>" + _CSS.substitute(
         bg=P["bg"], surface=P["surface"], card=P["card"], border=P["border"], text=P["text"], muted=P["muted"],
-        sage=P["sage"], beige=P["beige"], green=P["green"], amber=P["amber"], sky=P["sky"],
+        accent=P["accent"], olive=P["olive"], olive_hi=P["olive_hi"], beige=P["beige"], amber=P["amber"], sky=P["sky"],
+        accent_rgb=_rgb(P["accent"]), beige_rgb=_rgb(P["beige"]), muted_rgb=_rgb(P["muted"]),
+        org_px=C.HEADER_ORG_PX, land_px=C.HEADER_LANDSCAPE_PX,
         font_ui=FONT_UI, font_display=FONT_DISPLAY,
         pad=C.CARD_PAD, head=C.CARD_HEAD, h_main=C.H_MAIN, h_bottom=C.H_BOTTOM, h_ctl=C.H_CTL,
         h_kpi_lg=(C.H_BOTTOM - 10) // 2,
@@ -217,9 +230,10 @@ def card_header(title: str, pill: str | None = None) -> str:
     return f'<div class="card-h"><span class="card-h-t">{title}</span>{pill_html}</div>'
 
 
-def kpi_html(label: str, value: str, accent: str, note: str = "") -> str:
+def kpi_html(label: str, value: str, accent: str, note: str = "", unit: str = "") -> str:
+    u = f' <span class="kpi-u">({unit})</span>' if unit else ""
     n = f'<span class="kpi-n">{note}</span>' if note else ""
-    return f'<div class="kpi" style="--accent:{accent}"><div class="kpi-l">{label}</div><div class="kpi-v">{value}{n}</div></div>'
+    return f'<div class="kpi" style="--accent:{accent}"><div class="kpi-l">{label}{u}</div><div class="kpi-v">{value}{n}</div></div>'
 
 
 def _grad(cmap: str) -> str:
@@ -245,9 +259,11 @@ def legend_html(layer: str, agb_range: tuple[float, float]) -> str:
         title, cmap, lo, hi = "NDVI", C.CMAP_NDVI, C.NDVI_VMIN, C.NDVI_VMAX
     else:
         title, cmap, (lo, hi) = "AGB (Mg/ha)", C.CMAP_AGB, agb_range
+    vals = np.linspace(lo, hi, 5) if layer == "agb" else [lo, hi]
+    ticks = "".join(f"<span>{v:.0f}</span>" if layer == "agb" else f"<span>{v:.2f}</span>" for v in vals)
     return (f'<div class="lg"><div class="lg-title">{title}</div>'
             f'<div class="lg-bar" style="background:linear-gradient(to right, {_grad(cmap)})"></div>'
-            f'<div class="lg-mm"><span>{lo:.2f}</span><span>{hi:.2f}</span></div>'
+            f'<div class="lg-mm">{ticks}</div>'
             f'<div class="lg-sep"></div><div class="lg-sub">Classes (charts)</div>{_class_items(compact=True)}</div>')
 
 
